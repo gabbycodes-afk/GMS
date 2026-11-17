@@ -9,7 +9,6 @@ import {
   Clock3,
   X,
   Pencil,
-  Trash2,
   ChevronDown,
   Gamepad2,
   Activity,

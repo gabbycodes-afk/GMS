@@ -1,10 +1,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import {
-  Search,
   Plus,
   Gamepad2,
-  Pencil,
   Trash2,
   Star,
   Monitor,
@@ -25,7 +23,11 @@ import Modal from "../components/ui/Modal";
 import Button from "../components/ui/Button";
 import Badge from "../components/ui/Badge";
 import Loader from "../components/ui/Loader";
-import type { Game, GameFilters as GameFiltersType, GameFormData } from "../types";
+import type {
+  Game,
+  GameFilters as GameFiltersType,
+  GameFormData,
+} from "../types";
 
 const initialFilters: GameFiltersType = {
   search: "",
@@ -67,9 +69,14 @@ export default function GamesLibrary() {
 
     return result.sort((a, b) => {
       if (filters.sortBy === "rating") return b.rating - a.rating;
+
       if (filters.sortBy === "releaseDate") {
-        return new Date(b.releaseDate).getTime() - new Date(a.releaseDate).getTime();
+        return (
+          new Date(b.releaseDate).getTime() -
+          new Date(a.releaseDate).getTime()
+        );
       }
+
       return a.title.localeCompare(b.title);
     });
   }, [games, filters]);
@@ -85,13 +92,13 @@ export default function GamesLibrary() {
 
     await dispatch(
       updateGame({
-        ...editingGame,
-        ...data,
+        id: editingGame.id,
+        data,
       })
     ).unwrap();
 
-    setEditingGame(null);
     setModalOpen(false);
+    setEditingGame(null);
     setNotice("Game updated successfully.");
   };
 
@@ -119,16 +126,19 @@ export default function GamesLibrary() {
   };
 
   const totalGames = games.length;
+
   const averageRating =
     totalGames > 0
       ? games.reduce((total, game) => total + game.rating, 0) / totalGames
       : 0;
+
   const availableGames = games.filter(
     (game) => game.status === "Available"
   ).length;
 
   return (
     <div className="space-y-8 pb-10">
+      {/* Page Header */}
       <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#21183b] via-[#17152b] to-[#111827] p-7 sm:p-9">
         <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-violet-600/20 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-32 right-1/3 h-64 w-64 rounded-full bg-fuchsia-600/10 blur-3xl" />
@@ -136,9 +146,11 @@ export default function GamesLibrary() {
         <div className="relative flex flex-col justify-between gap-6 md:flex-row md:items-center">
           <div>
             <Badge variant="purple">GAME COLLECTION</Badge>
+
             <h1 className="mt-4 text-3xl font-bold tracking-tight text-white sm:text-4xl">
               Games Library
             </h1>
+
             <p className="mt-2 max-w-xl text-sm leading-6 text-slate-400">
               Manage your gaming catalogue, explore titles, and keep your
               collection organised in one place.
@@ -151,13 +163,17 @@ export default function GamesLibrary() {
           </Button>
         </div>
 
+        {/* Collection Statistics */}
         <div className="relative mt-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
           <div className="rounded-2xl border border-white/10 bg-white/[0.05] p-4">
             <div className="flex items-center gap-3 text-slate-400">
               <Gamepad2 size={18} />
               <span className="text-xs">Total Games</span>
             </div>
-            <p className="mt-3 text-2xl font-bold text-white">{totalGames}</p>
+
+            <p className="mt-3 text-2xl font-bold text-white">
+              {totalGames}
+            </p>
           </div>
 
           <div className="rounded-2xl border border-white/10 bg-white/[0.05] p-4">
@@ -165,6 +181,7 @@ export default function GamesLibrary() {
               <Star size={18} />
               <span className="text-xs">Average Rating</span>
             </div>
+
             <p className="mt-3 text-2xl font-bold text-white">
               {averageRating.toFixed(1)}
               <span className="ml-1 text-sm text-slate-500">/ 10</span>
@@ -176,6 +193,7 @@ export default function GamesLibrary() {
               <Monitor size={18} />
               <span className="text-xs">Available Games</span>
             </div>
+
             <p className="mt-3 text-2xl font-bold text-white">
               {availableGames}
             </p>
@@ -183,50 +201,70 @@ export default function GamesLibrary() {
         </div>
       </section>
 
+      {/* Success Notification */}
       {notice && (
-        <div className="flex items-center justify-between rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-400">
+        <div className="flex items-center justify-between rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-600 dark:text-emerald-400">
           {notice}
-          <button onClick={() => setNotice("")} aria-label="Dismiss notification">
+
+          <button
+            onClick={() => setNotice("")}
+            aria-label="Dismiss notification"
+            className="transition hover:opacity-70"
+          >
             <X size={16} />
           </button>
         </div>
       )}
 
+      {/* Games Collection */}
       <section className="space-y-5">
         <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
           <div>
-            <h2 className="text-xl font-bold text-white">Your Collection</h2>
-            <p className="mt-1 text-sm text-slate-500">
-              {filteredGames.length} {filteredGames.length === 1 ? "game" : "games"} found
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+              Your Collection
+            </h2>
+
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+              {filteredGames.length}{" "}
+              {filteredGames.length === 1 ? "game" : "games"} found
             </p>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-[#171827] p-4">
-          <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-slate-300">
+        {/* Filters */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#171827]">
+          <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
             <SlidersHorizontal size={16} />
             Filters and sorting
           </div>
+
           <GameFilters filters={filters} onChange={setFilters} />
         </div>
 
+        {/* Loading, Error, Empty and Games States */}
         {loading && games.length === 0 ? (
           <div className="flex min-h-64 items-center justify-center">
             <Loader />
           </div>
         ) : error ? (
-          <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-6 text-center text-sm text-red-400">
+          <div className="rounded-2xl border border-red-500/20 bg-red-500/10 p-6 text-center text-sm text-red-500 dark:text-red-400">
             {error}
           </div>
         ) : filteredGames.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-white/10 bg-[#171827] px-6 py-16 text-center">
-            <Gamepad2 className="mx-auto text-slate-600" size={40} />
-            <h3 className="mt-4 text-lg font-semibold text-white">
+          <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center dark:border-white/10 dark:bg-[#171827]">
+            <Gamepad2
+              className="mx-auto text-slate-400 dark:text-slate-600"
+              size={40}
+            />
+
+            <h3 className="mt-4 text-lg font-semibold text-slate-900 dark:text-white">
               No games found
             </h3>
-            <p className="mt-2 text-sm text-slate-500">
+
+            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
               Try adjusting your filters or add a new game to your collection.
             </p>
+
             <Button className="mt-5" onClick={openAddModal}>
               <Plus size={17} />
               Add a Game
@@ -246,6 +284,7 @@ export default function GamesLibrary() {
         )}
       </section>
 
+      {/* Add / Edit Game Modal */}
       <Modal
         isOpen={modalOpen}
         onClose={closeModal}
@@ -258,23 +297,29 @@ export default function GamesLibrary() {
         />
       </Modal>
 
+      {/* Delete Confirmation Modal */}
       <Modal
         isOpen={Boolean(deletingGame)}
         onClose={() => setDeletingGame(null)}
         title="Delete Game"
       >
         <div className="space-y-5">
-          <p className="text-sm leading-6 text-slate-400">
+          <p className="text-sm leading-6 text-slate-600 dark:text-slate-400">
             Are you sure you want to delete{" "}
-            <span className="font-semibold text-white">
+            <span className="font-semibold text-slate-900 dark:text-white">
               {deletingGame?.title}
             </span>
             ? This action cannot be undone.
           </p>
+
           <div className="flex justify-end gap-3">
-            <Button variant="outline" onClick={() => setDeletingGame(null)}>
+            <Button
+              variant="outline"
+              onClick={() => setDeletingGame(null)}
+            >
               Cancel
             </Button>
+
             <Button variant="danger" onClick={handleDeleteGame}>
               <Trash2 size={16} />
               Delete Game
